@@ -1,0 +1,49 @@
+#include <X11/Xlib.h>
+#include <iostream>
+#include <cstring> // Include the cstring header for strlen
+
+int main() {
+    Display *display;
+    Window window;
+    XEvent event;
+    const char *msg = "Hello, X11 World!, This is being done with docker!";
+    int s;
+
+    // Open connection to the X server
+    display = XOpenDisplay(NULL);
+
+    if (display == NULL) {
+        std::cerr << "Cannot open display" << std::endl;
+        return 1;
+    }
+
+    s = DefaultScreen(display);
+
+    // Create a window
+    window = XCreateSimpleWindow(display, RootWindow(display, s), 10, 10, 200, 100, 1,
+                                 BlackPixel(display, s), WhitePixel(display, s));
+
+    // Select kind of events we are interested in
+    XSelectInput(display, window, ExposureMask | KeyPressMask);
+
+    // Map (show) the window
+    XMapWindow(display, window);
+
+    // Draw the window
+    while (1) {
+        XNextEvent(display, &event);
+        
+        if (event.type == Expose) {
+            XFillRectangle(display, window, DefaultGC(display, s), 20, 20, 10, 10);
+            XDrawString(display, window, DefaultGC(display, s), 50, 50, msg, strlen(msg));
+        }
+        if (event.type == KeyPress)
+            break;
+    }
+
+    // Close connection to the X server
+    XCloseDisplay(display);
+
+    return 0;
+}
+

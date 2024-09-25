@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: imagedb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+
+  python-app:
+    build: ./SS_AB_Python
+    environment:
+      - DISPLAY=host.docker.internal:0
+    depends_on:
+      - mysql
+

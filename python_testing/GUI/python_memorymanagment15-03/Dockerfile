@@ -1,0 +1,18 @@
+# Use an official Python runtime as a parent image
+FROM python:3.8-slim
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy the current directory contents into the container at /usr/src/app
+COPY . .
+
+# Install any needed packages specified in requirements.txt
+# We'll install Tkinter and any other necessary packages
+RUN apt-get update && apt-get install -y \
+    python3-tk \
+    && rm -rf /var/lib/apt/lists/*
+
+# Run your Python script when the container launches
+CMD ["python", "main.py"]
+

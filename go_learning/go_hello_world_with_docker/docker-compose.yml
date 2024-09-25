@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - go-modules:/go/pkg/mod
+    command: go run main.go
+    ports:
+      - "8080:8080"
+
+volumes:
+  go-modules:

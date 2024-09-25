@@ -1,0 +1,3 @@
+path=/app/data
+extension=.pdf
+sorting=ascending

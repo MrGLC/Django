@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Call Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            width: 100%;
+            text-align: center;
+        }
+
+        .timer-section {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .buttons-section,
+        .preview-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            filter: brightness(90%);
+        }
+
+        .split-button {
+            display: flex;
+            gap: 5px;
+        }
+
+        .split-button button {
+            flex: 1;
+            font-size: 0.9em;
+            padding: 8px 5px;
+        }
+
+        #preview-box {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            overflow-y: auto;
+            background-color: white;
+        }
+
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* Red shade buttons */
+        .red-shade {
+            background-color: #ff4d4d;
+        }
+
+        /* Yellow shade buttons */
+        .yellow-shade {
+            background-color: #ffd966;
+            color: #333;
+        }
+
+        /* Dark grey shade buttons */
+        .dark-shade {
+            background-color: #4d4d4d;
+        }
+
+        /* Blue buttons */
+        .blue-button {
+            background-color: #3498db;
+        }
+
+        .blue-button.active {
+            background-color: #2980b9;
+        }
+
+        /* Green shade buttons */
+        .green-shade {
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>AI Call Tracker</h1>
+        <div class="timer-section">
+            <span id="timer">00:00</span>
+            <button id="start-timer" class="blue-button">Start Timer</button>
+        </div>
+        <div class="buttons-section">
+            <div class="split-button">
+                <button class="green-shade">Bot interrupted</button>
+                <button class="green-shade">Bad Interruption</button>
+                <button class="green-shade">Interruption not occurred</button>
+                <button class="green-shade">Correct interruption</button>
+            </div>
+            <button class="red-shade">Wrong reply due to wrong transcript</button>
+            <div class="split-button">
+                <button class="red-shade">Logic issue</button>
+                <button class="red-shade">Script issue</button>
+            </div>
+            <button class="yellow-shade">Bot stuttered</button>
+            <button class="yellow-shade">Wrong pronunciation</button>
+            <button class="yellow-shade">Bot Paused</button>
+            <button class="dark-shade">Total Silence</button>
+            <div class="split-button">
+                <button class="dark-shade">Bot couldn't hear the driver</button>
+                <button class="dark-shade">Driver couldn't hear the bot</button>
+            </div>
+            <button class="dark-shade">Call dropped suddenly</button>
+            <div class="split-button">
+                <button class="dark-shade">Static</button>
+                <button class="dark-shade">Echo</button>
+            </div>
+        </div>
+        <div class="preview-section">
+            <h2>Final Response Preview</h2>
+            <div id="preview-box"></div>
+            <button id="copy-button" class="blue-button">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const buttons = document.querySelectorAll('.buttons-section button');
+            const previewBox = document.getElementById('preview-box');
+            const copyButton = document.getElementById('copy-button');
+            const timerDisplay = document.getElementById('timer');
+            const startTimerButton = document.getElementById('start-timer');
+
+            let timerInterval;
+            let seconds = 0;
+            let isTimerRunning = false;
+
+            function formatTime(totalSeconds) {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            function startTimer() {
+                if (isTimerRunning) {
+                    clearInterval(timerInterval);
+                    seconds = 0;
+                    timerDisplay.textContent = '00:00';
+                    startTimerButton.textContent = 'Start Timer';
+                    startTimerButton.classList.remove('active');
+                    isTimerRunning = false;
+                } else {
+                    timerInterval = setInterval(() => {
+                        seconds++;
+                        timerDisplay.textContent = formatTime(seconds);
+                    }, 1000);
+                    startTimerButton.textContent = 'Reset Timer';
+                    startTimerButton.classList.add('active');
+                    isTimerRunning = true;
+                }
+            }
+
+            startTimerButton.addEventListener('click', startTimer);
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!isTimerRunning) {
+                        alert('Please start the timer first!');
+                        return;
+                    }
+                    const currentTime = timerDisplay.textContent;
+                    const text = `${currentTime} ${this.textContent.trim()}`;
+                    previewBox.textContent += (previewBox.textContent ? '\n' : '') + text;
+                });
+            });
+
+            copyButton.addEventListener('click', function () {
+                if (previewBox.textContent) {
+                    navigator.clipboard.writeText(previewBox.textContent)
+                        .then(() => alert('Content copied to clipboard!'))
+                        .catch(err => {
+                            console.error('Failed to copy: ', err);
+                            alert('Failed to copy to clipboard. Please try again.');
+                        });
+                } else {
+                    alert('No content to copy. Please log some events first.');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
